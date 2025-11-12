@@ -1,139 +1,72 @@
-# 🌐 Website Uptime Monitor — AWS Serverless Project
-
-![AWS](https://img.shields.io/badge/AWS-Lambda-orange)
-![Status](https://img.shields.io/badge/Status-Live-brightgreen)
-![License](https://img.shields.io/badge/License-MIT-blue)
+# 🌐 Website Uptime Monitor (AWS Cloud Project)
 
 ## 📖 Overview
-The **Website Uptime Monitor** is a serverless cloud-based system that automatically checks if a website is online every 5 minutes.
+The **Website Uptime Monitor** is a serverless AWS project that automatically checks if a website is up and running every 5 minutes.  
+If the site goes down, the system instantly sends an alert via **Amazon SNS (Simple Notification Service)**.
 
-If the site goes down, it immediately sends an **email alert via SNS** and logs the event in **DynamoDB** for tracking uptime history.
-
-This project demonstrates **real-time cloud monitoring automation** using AWS Free Tier services.
+This project uses a combination of **AWS Lambda**, **EventBridge**, and **SNS** — all under the **Free Tier**.
 
 ---
 
-## 🧱 Architecture
-
-```text
-┌──────────────────────────────┐
-│  EventBridge (Scheduler)     │
-│  Triggers every 5 minutes    │
-└──────────────┬───────────────┘
-               │
-               ▼
-┌──────────────────────────────┐
-│       AWS Lambda             │
-│  - Checks website status     │
-│  - Stores result in DynamoDB │
-│  - Sends alert via SNS       │
-└──────────────┬───────────────┘
-               │
-       ┌───────┴────────┐
-       │                │
-       ▼                ▼
-┌────────────┐    ┌──────────────┐
-│ SNS Topic  │    │ DynamoDB     │
-│ Email Alert│    │ Uptime Log   │
-└────────────┘    └──────────────┘
-
-| Service                | Purpose                                     |
-| ---------------------- | ------------------------------------------- |
-| **AWS Lambda**         | Runs the uptime check logic                 |
-| **Amazon EventBridge** | Triggers Lambda every 5 minutes             |
-| **Amazon DynamoDB**    | Stores uptime logs (URL, status, timestamp) |
-| **Amazon SNS**         | Sends alerts when a site is down            |
-| **Amazon CloudWatch**  | Logs Lambda execution results               |
-
-⚙️ Step-by-Step Setup
-1️⃣ Create SNS Topic
-
-Go to AWS Console → SNS → Topics → Create topic
-
-Type: Standard
-
-Name: Websitedownalert
-
-Add a subscription → Email → enter your email
-
-Confirm subscription in your email
-
-2️⃣ Create DynamoDB Table
-
-Go to DynamoDB → Create table
-
-Table name: WebsiteStatus
-
-Partition key: URL (String)
-
-Sort key: Timestamp (Number)
-
-Create table
-
-3️⃣ Create Lambda Function
-
-Go to Lambda → Create function
-
-Runtime: Python 3.12
-
-Name: WebsiteUptimeMonitor
-
-Create or use IAM role with:
-
-DynamoDBFullAccess
-
-SNSFullAccess
-
-CloudWatchLogsFullAccess
-
-Paste the code from lambda_function.py
-
-Deploy → Test (You should see ✅ UP or 🚨 DOWN logs)
-
-4️⃣ Schedule Automatic Checks
-
-Go to EventBridge → Rules → Create rule
-
-Rule type: Schedule
-
-Expression:
-
-rate(5 minutes)
+## 🏗️ Architecture Diagram
 
 
-Target: your Lambda function
+[ EventBridge Rule (Every 5 mins) ]
+│
+▼
+[ AWS Lambda Function ]
+│
+┌─────────┴─────────┐
+▼                   ▼
+Website Check     SNS Alert (Email)
 
-Create rule
+---
 
-Lambda now runs every 5 minutes automatically.
+## ⚙️ Components Used
 
-🔍 Verify It Works
-Check	Where	Expected Result
-Lambda Logs	CloudWatch → Logs	“✅ Website is UP! (200)”
-DynamoDB Table	Explore table items	New status entries every 5 mins
-Email Alerts (SNS)	Inbox	Alert when site is DOWN
-🧠 Why I Built It
+| AWS Service | Purpose |
+|--------------|----------|
+| **AWS Lambda** | Runs the Python code to check website uptime |
+| **Amazon EventBridge** | Triggers the Lambda every 5 minutes automatically |
+| **Amazon SNS** | Sends alerts when the website is down |
+| **GitHub Pages (or any website)** | The monitored target URL |
 
-✅ Automate website uptime monitoring
+---
 
-📩 Get instant alerts when my site goes down
+## 💻 Lambda Function Code (`lambda_function.py`)
 
-🧾 Store uptime history for analytics
+```python
+import json
+import urllib3
+import boto3
 
-🧠 Learn & apply AWS serverless architecture
+# Initialize AWS SNS client
+sns = boto3.client('sns')
 
-💼 Strengthen my Cloud Engineering portfolio
+# Built-in HTTP manager (no need for 'requests' library)
+http = urllib3.PoolManager()
 
-🚧 Problems Faced
+def lambda_handler(event, context):
+    url = "https://haneeo3.github.io/olajobihaneef/#contact"  # target website
+    sns_arn = "arn:aws:sns:us-east-1:770854396539:Websitedownalert"
 
-See detailed report in PROBLEMS_AND_SOLUTIONS.md
+    try:
+        response = http.request('GET', url)
+        status = response.status
 
-🚀 Future Improvements
+        if status == 200:
+            print(f"✅ Website is up! Status: {status}")
+        else:
+            message = f"⚠️ Website might be down! Returned status code: {status}"
+            sns.publish(TopicArn=sns_arn, Message=message, Subject="Website Down Alert")
+            print(message)
 
-Add multiple URLs to monitor via DynamoDB
+    except Exception as e:
+        error_message = f"❌ Website check failed: {e}"
+        sns.publish(TopicArn=sns_arn, Message=error_message, Subject="Website Down Alert")
+        print(error_message)
 
-Build a web dashboard (API Gateway + HTML/JS)
-
-Track response time (ms)
-
-Send daily uptime summaries
+    return {
+        'statusCode': 200,
+        'body': json.dumps('Website uptime check complete.')
+    }
