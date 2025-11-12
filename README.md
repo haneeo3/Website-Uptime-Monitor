@@ -105,3 +105,19 @@ def lambda_handler(event, context):
 2. **Name:** `WebsiteMonitorSchedule`
 3. Choose **Schedule** as the event source.
 4. In the schedule expression box, type:
+
+rate(5 minutes)
+5. Under **Target**, select your Lambda function.
+6. Click **Create Rule**.
+
+✅ **Now the system automatically checks your website every 5 minutes.**
+
+---
+
+### 🧪 Step 4: Test Alerts
+
+1. Temporarily change your target URL in the Lambda code to an invalid one (like `https://invalidtesturl.com`).
+2. Wait **5 minutes** or manually run the Lambda test again.
+3. You should receive an **email alert** from AWS SNS.
+
+---
