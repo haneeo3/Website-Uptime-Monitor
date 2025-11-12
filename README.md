@@ -70,9 +70,7 @@ def lambda_handler(event, context):
         'statusCode': 200,
         'body': json.dumps('Website uptime check complete.')
     }
-
-
-
+```
 🪜 Step-by-Step Setup Guide
 Step 1: Create SNS Topic
 
