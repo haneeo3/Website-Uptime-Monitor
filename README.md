@@ -121,3 +121,44 @@ rate(5 minutes)
 3. You should receive an **email alert** from AWS SNS.
 
 ---
+## 💻 Optional: Run Locally with Windows Task Scheduler
+
+If you prefer to monitor your website from your computer instead of AWS Lambda, follow these steps:
+
+### Step 1: Save Your Python Script
+1. Open Notepad or VS Code.
+2. Paste your website monitor Python code.
+3. Save it as `uptime_monitor.py` in a folder like:
+
+
+
+---
+
+### Step 2: Test It Manually
+1. Open Command Prompt.
+2. Run:
+python "C:\Users\YOURNAME\Documents\WebsiteMonitor\uptime_monitor.py"
+3. Confirm it prints "Website is up" or sends an alert if down.
+
+---
+
+### Step 3: Automate with Task Scheduler
+1. Press **Windows + S** → Search **Task Scheduler**.
+2. Click **Create Task**.
+3. Under **General**, name it `Website Uptime Monitor`.
+4. Under **Triggers**, click **New**:
+- Choose “Daily” or “Repeat every 5 minutes”.
+5. Under **Actions**, click **New**:
+- Program/script: `python`
+- Add arguments: `"C:\Users\YOURNAME\Documents\WebsiteMonitor\uptime_monitor.py"`
+6. Click **OK** to save.
+
+---
+
+### Step 4: Test Your Task
+1. In Task Scheduler, find your task.
+2. Right-click it → **Run**.
+3. Wait a few seconds — your script should run automatically.
+
+✅ You’ve now set up a **local uptime monitor** using Windows Task Scheduler!
+
