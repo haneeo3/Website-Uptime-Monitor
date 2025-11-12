@@ -71,63 +71,37 @@ def lambda_handler(event, context):
         'body': json.dumps('Website uptime check complete.')
     }
 ```
-🪜 Step-by-Step Setup Guide
-Step 1: Create SNS Topic
+## 🪜 Step-by-Step Setup Guide
 
-Go to Amazon SNS → Topics → “Create topic”.
+---
 
-Name: Websitedownalert
+### 🥇 Step 1: Create SNS Topic
 
-Type: Standard
+1. Go to **Amazon SNS → Topics → “Create topic”**
+2. **Name:** `Websitedownalert`
+3. **Type:** Standard
+4. Add an **email subscription** (your email).
+5. Confirm your subscription from the email sent by AWS.
 
-Add an email subscription (your email).
+---
 
-Confirm your subscription from the email sent by AWS.
+### 🥈 Step 2: Create Lambda Function
 
-Step 2: Create Lambda Function
+1. Go to **AWS Lambda → “Create function”**
+2. Choose:
+   - **Author from scratch**
+   - **Runtime:** Python 3.9  
+   - **Name:** `WebsiteUptimeMonitor`
+3. In **Code Source**, paste the Python code above.
+4. Click **Deploy**.
+5. Click **Test**, create a test event named `websiteuptime`, and run it.
+6. Confirm in **Logs** that the site is up.
 
-Go to AWS Lambda → “Create function”.
+---
 
-Choose:
+### 🥉 Step 3: Schedule Automatic Checks
 
-Author from scratch
-
-Runtime: Python 3.9
-
-Name: WebsiteUptimeMonitor
-
-In Code Source, paste the Python code above.
-
-Click Deploy.
-
-Click Test, create a test event named websiteuptime, and run it.
-
-Confirm in Logs that the site is up.
-
-Step 3: Schedule Automatic Checks
-
-Go to Amazon EventBridge → Rules → “Create rule”.
-
-Name: WebsiteMonitorSchedule.
-
-Choose Schedule as the event source.
-
-In the schedule expression box, type:
-
-rate(5 minutes)
-
-
-Under Target, select your Lambda function.
-
-Click Create Rule.
-
-✅ Now the system automatically checks your website every 5 minutes.
-
-Step 4: Test Alerts
-
-Temporarily change your target URL in the Lambda code to an invalid one (like https://invalidtesturl.com
-).
-
-Wait 5 minutes or manually run the Lambda test again.
-
-You should receive an email alert from AWS SNS.
+1. Go to **Amazon EventBridge → Rules → “Create rule”**
+2. **Name:** `WebsiteMonitorSchedule`
+3. Choose **Schedule** as the event source.
+4. In the schedule expression box, type:
